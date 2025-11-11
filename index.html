@@ -10,94 +10,121 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Nút nổi hiện đại, thanh lịch -->
-  <button id="islandCreate" class="island-btn" aria-haspopup="dialog" aria-controls="modal" aria-label="Tạo sự kiện">
-    <span class="island-icon">＋</span> Tạo sự kiện
-  </button>
+
+  <div class="floating-actions-area">
+    <button id="islandCreate" class="island-btn" aria-haspopup="dialog" aria-controls="modal" aria-label="Tạo sự kiện" data-lang-aria="modalTitle">
+      <span class="island-icon">＋</span>
+      <span data-lang="createEventBtn">Tạo sự kiện</span>
+    </button>
+    
+    <div class="settings-menu">
+      <button id="settingsToggle" class="icon-btn settings-btn" aria-label="Cài đặt" data-lang-aria="settingsAria" aria-haspopup="true" aria-expanded="false">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="20" height="20">
+          <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+        </svg>
+      </button>
+      <div id="settingsDropdown" class="settings-dropdown" role="menu" hidden>
+        <div class="setting-item">
+          <label for="langSwitch" data-lang="modalLabelLang">Ngôn ngữ</label>
+          <select id="langSwitch" class="select" aria-label="Ngôn ngữ / Language">
+            <option value="vi">Tiếng Việt</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+        
+        <div class="setting-item">
+          <label for="themeSelect" data-lang="modalLabelTheme">Giao diện</label>
+          <select id="themeSelect" class="select">
+            <option value="auto" data-lang="themeAuto">Tự động</option>
+            <option value="light" data-lang="themeLight">Sáng</option>
+            <option value="dark" data-lang="themeDark">Tối</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
 
   <header class="site-header">
-    <div class="container">
-      <h1 class="site-title">Event Countdown</h1>
+    <div class="container" style="display: flex; justify-content: space-between; align-items: center; gap: 16px;">
+      <h1 class="site-title" data-lang="siteTitle">Event Countdown</h1>
     </div>
   </header>
 
   <main class="container">
     <section aria-labelledby="countdown-heading" class="card">
-      <h2 id="countdown-heading">Đếm ngược</h2>
+      <h2 id="countdown-heading" data-lang="countdownHeading">Đếm ngược</h2>
 
       <div class="countdown" aria-live="polite">
-        <div class="cell"><div id="d" class="num">0</div><div class="lbl">Ngày</div></div>
-        <div class="cell"><div id="h" class="num">00</div><div class="lbl">Giờ</div></div>
-        <div class="cell"><div id="m" class="num">00</div><div class="lbl">Phút</div></div>
-        <div class="cell"><div id="s" class="num">00</div><div class="lbl">Giây</div></div>
+        <div class="cell"><div id="d" class="num">0</div><div id="lbl-d" class="lbl" data-lang="lblDay">Ngày</div></div>
+        <div class="cell"><div id="h" class="num">00</div><div id="lbl-h" class="lbl" data-lang="lblHour">Giờ</div></div>
+        <div class="cell"><div id="m" class="num">00</div><div id="lbl-m" class="lbl" data-lang="lblMinute">Phút</div></div>
+        <div class="cell"><div id="s" class="num">00</div><div id="lbl-s" class="lbl" data-lang="lblSecond">Giây</div></div>
       </div>
 
       <div class="meta">
         <div>
-          <div id="displayTitle" class="event-title">Sự kiện của bạn</div>
-          <div id="displayDate" class="muted">Nhấn “Tạo sự kiện” để bắt đầu.</div>
+          <div id="displayTitle" class="event-title" data-lang-default="defaultEventTitle">Sự kiện của bạn</div>
+          <div id="displayDate" class="muted" data-lang-default="defaultEventDate">Nhấn “Tạo sự kiện” để bắt đầu.</div>
         </div>
         <div id="helper" class="muted"></div>
       </div>
 
-      <div class="progress" role="progressbar" aria-label="Tiến độ tới thời điểm sự kiện" aria-valuemin="0" aria-valuemax="100">
+      <div id="progress-bar" class="progress" role="progressbar" aria-label="Tiến độ tới thời điểm sự kiện" data-lang-aria="ariaProgress" aria-valuemin="0" aria-valuemax="100">
         <div id="bar" class="bar"></div>
       </div>
 
       <div class="helper-row">
-        <span class="muted">Trạng thái URL: <span id="urlStatus" class="mono"></span></span>
+        <span class="muted"><span data-lang="urlStatusLabel">Trạng thái URL:</span> <span id="urlStatus" class.mono"></span></span>
         <span id="status" class="status" role="status" aria-live="polite"></span>
       </div>
     </section>
 
-    <!-- Thư viện: mỗi sự kiện là 1 ô -->
-    <section aria-labelledby="lib-heading" class="card">
+    <section id="librarySection" aria-labelledby="lib-heading" class="card">
       <div class="lib-head">
-        <h2 id="lib-heading">Thư viện sự kiện Việt Nam</h2>
+        <h2 id="lib-heading" data-lang="libHeading">Thư viện sự kiện Việt Nam</h2>
         <div class="lib-controls">
-          <input id="search" class="input" placeholder="Tìm: Tết, 30/4, Quốc khánh, Trung thu, THPTQG..." />
-          <!-- ⬇️ Dropdown chỉ chứa năm có trong thư viện + do người dùng tạo -->
+          <input id="search" class="input" placeholder="Tìm: Tết, 30/4, Quốc khánh, Trung thu, THPTQG..." data-lang-placeholder="searchPlaceholder" />
           <select id="year" class="select"></select>
         </div>
       </div>
 
       <ul id="list" class="cards" aria-label="Danh sách sự kiện có sẵn"></ul>
 
-      <p class="muted small">
+      <p class="muted small" data-lang="libNote">
         ⚠️ Một số mốc theo âm lịch là ước tính (tham khảo); ngày dương có thể thay đổi từng năm.
       </p>
     </section>
   </main>
 
-  <!-- Modal tạo sự kiện -->
   <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
     <div class="modal-card">
       <div class="modal-head">
-        <h3 id="modal-title">Tạo sự kiện</h3>
-        <button id="modalClose" class="icon-btn" aria-label="Đóng">✕</button>
+        <h3 id="modal-title" data-lang="modalTitle">Tạo sự kiện</h3>
+        <button id="modalClose" class="icon-btn" aria-label="Đóng" data-lang-aria="modalCloseLabel">✕</button>
       </div>
 
       <div class="modal-body">
         <label class="field">
-          <span class="label">Tên sự kiện</span>
-          <input id="title" class="input" placeholder="VD: Giao thừa {yyyy}, Sinh nhật..." autocomplete="off" />
+          <span class="label" data-lang="modalLabelTitle">Tên sự kiện</span>
+          <input id="title" class="input" placeholder="VD: Giao thừa {yyyy}, Sinh nhật..." data-lang-placeholder="modalPlaceholderTitle" autocomplete="off" />
         </label>
 
         <label class="field">
-          <span class="label">Ngày & giờ</span>
+          <span class="label" data-lang="modalLabelDate">Ngày & giờ</span>
           <input id="date" type="datetime-local" class="input" />
         </label>
 
         <label class="field">
-          <span class="label">Múi giờ</span>
-          <input id="tz" class="input" disabled />
+          <span class="label" data-lang="modalLabelTZ">Múi giờ</span>
+          <select id="tzSelect" class="select"></select>
         </label>
       </div>
 
       <div class="modal-actions">
-        <button id="apply" class="btn primary">Bắt đầu đếm</button>
-        <button id="ics" class="btn">Tải .ics</button>
-        <button id="share" class="btn">Sao chép link</button>
+        <button id="apply" class="btn primary" data-lang="modalBtnApply">Bắt đầu đếm</button>
+        <button id="ics" class="btn" data-lang="modalBtnIcs">Tải .ics</button>
+        <button id="share" class="btn" data-lang="modalBtnShare">Sao chép link</button>
       </div>
     </div>
   </div>
