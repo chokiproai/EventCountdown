@@ -1,0 +1,151 @@
+@font-face {
+  font-family: 'H Mighty Kingdom';
+  src: url('H-Mighty-Kingdom.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+h1, h2, h3, .site-title {
+  font-family: 'H Mighty Kingdom', 'SVN Claytonia', 'Baloo 2', cursive;
+  font-weight: normal;
+  letter-spacing: 0.5px;
+  text-transform: none;
+}
+body {
+  font-family: 'Nunito', system-ui, sans-serif;
+}
+/* Auto text scheme; nền gradient theo yêu cầu */
+:root{
+  --fg:#0b1220; --muted:#4b5565; --card:#ffffffcc; --line:#e6e9f0;
+  --primary:#245bff; --primary-press:#1f49c9; --ring:#245bff33;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --fg:#0b1220; --muted:#334155; --card:#ffffffcc; --line:#dfe5f2;
+    --primary:#245bff; --primary-press:#1f49c9; --ring:#245bff33;
+  }
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background-image: linear-gradient(to top, #fff1eb 0%, #ace0f9 100%);
+  color:var(--fg);
+  font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
+}
+
+.container{max-width:960px;margin:0 auto;padding:16px}
+.site-header{border-bottom:1px solid var(--line); backdrop-filter:saturate(1.2) blur(6px)}
+.site-title{font-size:20px;margin:12px 0}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:16px;
+  margin:16px 0;
+  backdrop-filter: blur(10px);
+}
+
+/* Controls */
+.input, .select{
+  background:#ffffffee;color:#0b1220;border:1px solid var(--line);
+  border-radius:10px;padding:10px 12px;outline:none;
+}
+.input:focus, .select:focus{border-color:var(--primary);box-shadow:0 0 0 4px var(--ring)}
+.select{min-width:120px}
+
+/* Buttons */
+.btn{
+  appearance:none;border:1px solid var(--line);background:#ffffffee;color:#0b1220;
+  padding:10px 16px;border-radius:999px;cursor:pointer;font-weight:600;
+}
+.btn:hover{border-color:var(--primary)}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.btn.primary:active{background:var(--primary-press);border-color:var(--primary-press)}
+.icon-btn{background:#ffffffee;border:1px solid var(--line);color:#0b1220;border-radius:10px;padding:8px 10px;cursor:pointer}
+.icon-btn:hover{border-color:var(--primary)}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+
+/* Countdown */
+.countdown{display:grid;gap:12px;grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:12px}
+@media (max-width:560px){.countdown{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.cell{border:1px solid var(--line);border-radius:12px;text-align:center;padding:14px 8px;background:#fff9}
+.num{font-weight:800;font-size:32px}
+.lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.meta{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.event-title{font-weight:700}
+.progress{height:10px;border:1px solid var(--line);border-radius:999px;overflow:hidden;margin-top:10px;background:#fff9}
+.bar{height:100%;width:0;background:linear-gradient(90deg,var(--primary),#9a7bff)}
+.helper-row{display:flex;justify-content:space-between;gap:8px;margin-top:8px}
+.status{min-height:1lh}
+
+/* Library cards */
+.cards{list-style:none;margin:10px 0;padding-left:0;display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:780px){.cards{grid-template-columns:1fr}}
+.card-item{
+  border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;gap:12px;
+  align-items:center;justify-content:space-between;background:#ffffffd9; backdrop-filter: blur(10px);
+}
+.item-left{display:flex;gap:10px;align-items:flex-start}
+.emoji{
+  width:42px;height:42px;border-radius:999px;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:20px;background:#fff;
+}
+.item-meta{display:flex;flex-direction:column}
+.item-title{font-weight:700}
+.item-sub{font-size:12px;color:var(--muted)}
+.item-actions{display:flex;gap:8px}
+
+/* Modal */
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(10,20,30,.25);z-index:1000;backdrop-filter:blur(6px)}
+.modal[aria-hidden="false"]{display:flex}
+.modal-card{
+  background:#ffffffee;border:1px solid var(--line);border-radius:16px;
+  width:min(520px,92vw); box-shadow:0 18px 60px rgba(0,0,0,.15);
+}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line)}
+.modal-body{display:flex;flex-direction:column;gap:10px;padding:12px 16px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;padding:12px 16px;border-top:1px solid var(--line)}
+
+/* Nút nổi */
+.island-btn{
+  position:fixed; top:14px; right:14px; z-index:1100;
+  padding:10px 16px; border-radius:999px;
+  border:1px solid #dfe5f2; color:#0b1220;
+  background: linear-gradient(180deg, #ffffffee, #f6f9ffcc);
+  box-shadow: 0 10px 30px rgba(64,121,255,.25);
+  backdrop-filter: blur(10px);
+  cursor:pointer; font-weight:700; letter-spacing:.01em;
+  display:flex; align-items:center; gap:8px;
+  transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.island-btn:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 14px 34px rgba(64,121,255,.32);
+  border-color:#b7c6f7;
+}
+.island-icon{
+  width:22px;height:22px;display:inline-grid;place-items:center;
+  border-radius:999px;background:#e8efff;border:1px solid #cfe0ff;font-weight:900;
+}
+/* Past items: xám + khóa nút */
+.card-item.past{
+  opacity: .55;
+  filter: grayscale(.25);
+}
+.card-item.past .item-title{
+  text-decoration: none; /* hoặc 'line-through' nếu bạn thích */
+}
+.btn[disabled]{
+  opacity:.5;
+  cursor:not-allowed;
+  pointer-events:none;
+}
+@media (max-width:560px){ .island-btn{top:auto; bottom:16px; right:16px} }

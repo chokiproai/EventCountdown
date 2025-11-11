@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Event Countdown</title>
+  <meta name="description" content="Simple event countdown with Vietnamese presets. Works offline, pure static." />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#ace0f9" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Nút nổi hiện đại, thanh lịch -->
+  <button id="islandCreate" class="island-btn" aria-haspopup="dialog" aria-controls="modal" aria-label="Tạo sự kiện">
+    <span class="island-icon">＋</span> Tạo sự kiện
+  </button>
+
+  <header class="site-header">
+    <div class="container">
+      <h1 class="site-title">Event Countdown</h1>
+    </div>
+  </header>
+
+  <main class="container">
+    <section aria-labelledby="countdown-heading" class="card">
+      <h2 id="countdown-heading">Đếm ngược</h2>
+
+      <div class="countdown" aria-live="polite">
+        <div class="cell"><div id="d" class="num">0</div><div class="lbl">Ngày</div></div>
+        <div class="cell"><div id="h" class="num">00</div><div class="lbl">Giờ</div></div>
+        <div class="cell"><div id="m" class="num">00</div><div class="lbl">Phút</div></div>
+        <div class="cell"><div id="s" class="num">00</div><div class="lbl">Giây</div></div>
+      </div>
+
+      <div class="meta">
+        <div>
+          <div id="displayTitle" class="event-title">Sự kiện của bạn</div>
+          <div id="displayDate" class="muted">Nhấn “Tạo sự kiện” để bắt đầu.</div>
+        </div>
+        <div id="helper" class="muted"></div>
+      </div>
+
+      <div class="progress" role="progressbar" aria-label="Tiến độ tới thời điểm sự kiện" aria-valuemin="0" aria-valuemax="100">
+        <div id="bar" class="bar"></div>
+      </div>
+
+      <div class="helper-row">
+        <span class="muted">Trạng thái URL: <span id="urlStatus" class="mono"></span></span>
+        <span id="status" class="status" role="status" aria-live="polite"></span>
+      </div>
+    </section>
+
+    <!-- Thư viện: mỗi sự kiện là 1 ô -->
+    <section aria-labelledby="lib-heading" class="card">
+      <div class="lib-head">
+        <h2 id="lib-heading">Thư viện sự kiện Việt Nam</h2>
+        <div class="lib-controls">
+          <input id="search" class="input" placeholder="Tìm: Tết, 30/4, Quốc khánh, Trung thu, THPTQG..." />
+          <!-- ⬇️ Dropdown chỉ chứa năm có trong thư viện + do người dùng tạo -->
+          <select id="year" class="select"></select>
+        </div>
+      </div>
+
+      <ul id="list" class="cards" aria-label="Danh sách sự kiện có sẵn"></ul>
+
+      <p class="muted small">
+        ⚠️ Một số mốc theo âm lịch là ước tính (tham khảo); ngày dương có thể thay đổi từng năm.
+      </p>
+    </section>
+  </main>
+
+  <!-- Modal tạo sự kiện -->
+  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="modal-title">Tạo sự kiện</h3>
+        <button id="modalClose" class="icon-btn" aria-label="Đóng">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <label class="field">
+          <span class="label">Tên sự kiện</span>
+          <input id="title" class="input" placeholder="VD: Giao thừa {yyyy}, Sinh nhật..." autocomplete="off" />
+        </label>
+
+        <label class="field">
+          <span class="label">Ngày & giờ</span>
+          <input id="date" type="datetime-local" class="input" />
+        </label>
+
+        <label class="field">
+          <span class="label">Múi giờ</span>
+          <input id="tz" class="input" disabled />
+        </label>
+      </div>
+
+      <div class="modal-actions">
+        <button id="apply" class="btn primary">Bắt đầu đếm</button>
+        <button id="ics" class="btn">Tải .ics</button>
+        <button id="share" class="btn">Sao chép link</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
