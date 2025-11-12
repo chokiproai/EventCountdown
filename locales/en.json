@@ -63,7 +63,9 @@
     "libLoadError": "Error loading event library. Please reload the page.",
     "myEventsHeading": "My Events",
     "helperMini": "{d}d {h}h {m}m left",
-    "helperMiniPast": "Finished"
+    "helperMiniPast": "Finished",
+    "myEventsEmptyHeading": "No events yet",
+    "myEventsEmptyBody": "Press \"Create Event\" or add one from the library below to get started."
   },
   "library": {
     "VN_EVENTS": [],

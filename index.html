@@ -16,6 +16,7 @@
       <span class="island-icon">＋</span>
       <span data-lang="createEventBtn">Tạo sự kiện</span>
     </button>
+    
     <div class="settings-menu">
       <button id="settingsToggle" class="icon-btn settings-btn" aria-label="Cài đặt" data-lang-aria="settingsAria" aria-haspopup="true" aria-expanded="false">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="20" height="20">
@@ -30,6 +31,7 @@
             <option value="en">English</option>
           </select>
         </div>
+        
         <div class="setting-item">
           <label for="themeSelect" data-lang="modalLabelTheme">Giao diện</label>
           <select id="themeSelect" class="select">
@@ -42,6 +44,7 @@
     </div>
   </div>
 
+
   <header class="site-header">
     <div class="container">
       <h1 class="site-title" data-lang="siteTitle">Event Countdown</h1>
@@ -49,34 +52,31 @@
   </header>
 
   <main class="container">
-    <section aria-labelledby="countdown-heading" class="card">
-      <h2 id="countdown-heading" data-lang="countdownHeading">Đếm ngược</h2>
-      <div class="countdown" aria-live="polite">
-        <div class="cell"><div id="d" class="num">0</div><div id="lbl-d" class="lbl" data-lang="lblDay">Ngày</div></div>
-        <div class="cell"><div id="h" class="num">00</div><div id="lbl-h" class="lbl" data-lang="lblHour">Giờ</div></div>
-        <div class="cell"><div id="m" class="num">00</div><div id="lbl-m" class="lbl" data-lang="lblMinute">Phút</div></div>
-        <div class="cell"><div id="s" class="num">00</div><div id="lbl-s" class="lbl" data-lang="lblSecond">Giây</div></div>
-      </div>
-      <div class="meta">
-        <div>
-          <div id="displayTitle" class="event-title" data-lang-default="defaultEventTitle">Sự kiện của bạn</div>
-          <div id="displayDate" class="muted" data-lang-default="defaultEventDate">Nhấn “Tạo sự kiện” để bắt đầu.</div>
-        </div>
-        <div id="helper" class="muted"></div>
-      </div>
-      <div id="progress-bar" class="progress" role="progressbar" aria-label="Tiến độ tới thời điểm sự kiện" data-lang-aria="ariaProgress" aria-valuemin="0" aria-valuemax="100">
-        <div id="bar" class="bar"></div>
-      </div>
-      <div class="helper-row">
-        <span class="muted"><span data-lang="urlStatusLabel">Trạng thái URL:</span> <span id="urlStatus" class.mono"></span></span>
-        <span id="status" class="status" role="status" aria-live="polite"></span>
-      </div>
-    </section>
 
-    <section id="myEventsSection" aria-labelledby="my-events-heading" class="card">
-      <h2 id="my-events-heading" data-lang="myEventsHeading">Sự kiện của tôi</h2>
-      <ul id="my-events-list" class="cards" aria-live="off">
-        </ul>
+    <section id="main-countdown-section" aria-labelledby="my-events-heading" class="card">
+    <h2 id="my-events-heading" data-lang="myEventsHeading">Sự kiện của tôi</h2>
+    
+    <div id="countdown-list" class="countdown-list-grid">
+      </div>
+    
+    <div id="countdown-empty-placeholder" class="empty-placeholder" hidden>
+      <h3 data-lang="myEventsEmptyHeading">Chưa có sự kiện nào</h3>
+      <p data-lang="myEventsEmptyBody">Nhấn "Tạo sự kiện" hoặc thêm một sự kiện từ thư viện bên dưới để bắt đầu.</p>
+    </div>
+
+    <div class="helper-row" style="border-top: 1px solid var(--line); margin-top: 16px; padding-top: 12px;">
+      <span class="muted"><span data-lang="urlStatusLabel">Trạng thái URL:</span> <span id="urlStatus" class="mono"></span></span>
+      <span id="status" class="status" role="status" aria-live="polite"></span>
+    </div>
+    </section>
+      
+      <div id="countdown-list" class="countdown-list-grid">
+        </div>
+      
+      <div id="countdown-empty-placeholder" class="empty-placeholder" hidden>
+        <h3 data-lang="myEventsEmptyHeading">Chưa có sự kiện nào</h3>
+        <p data-lang="myEventsEmptyBody">Nhấn "Tạo sự kiện" hoặc thêm một sự kiện từ thư viện bên dưới để bắt đầu.</p>
+      </div>
     </section>
 
     <section id="librarySection" aria-labelledby="lib-heading" class="card">
@@ -101,20 +101,24 @@
         <h3 id="modal-title" data-lang="modalTitle">Tạo sự kiện</h3>
         <button id="modalClose" class="icon-btn" aria-label="Đóng" data-lang-aria="modalCloseLabel">✕</button>
       </div>
+
       <div class="modal-body">
         <label class="field">
           <span class="label" data-lang="modalLabelTitle">Tên sự kiện</span>
           <input id="title" class="input" placeholder="VD: Giao thừa {yyyy}, Sinh nhật..." data-lang-placeholder="modalPlaceholderTitle" autocomplete="off" />
         </label>
+
         <label class="field">
           <span class="label" data-lang="modalLabelDate">Ngày & giờ</span>
           <input id="date" type="datetime-local" class="input" />
         </label>
+
         <label class="field">
           <span class="label" data-lang="modalLabelTZ">Múi giờ</span>
           <select id="tzSelect" class="select"></select>
         </label>
       </div>
+
       <div class="modal-actions">
         <button id="apply" class="btn primary" data-lang="modalBtnApply">Bắt đầu đếm</button>
         <button id="ics" class="btn" data-lang="modalBtnIcs">Tải .ics</button>
@@ -122,6 +126,8 @@
       </div>
     </div>
   </div>
+
+  <audio id="alarmSound" src="alarm.mp3" preload="auto"></audio>
 
   <script src="app.js" defer></script>
 </body>

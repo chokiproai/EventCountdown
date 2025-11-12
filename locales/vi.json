@@ -63,7 +63,9 @@
     "libLoadError": "Lỗi tải thư viện sự kiện. Hãy thử tải lại trang.",
     "myEventsHeading": "Sự kiện của tôi",
     "helperMini": "Còn {d}d {h}h {m}m",
-    "helperMiniPast": "Đã qua"
+    "helperMiniPast": "Đã qua",
+    "myEventsEmptyHeading": "Chưa có sự kiện nào",
+    "myEventsEmptyBody": "Nhấn \"Tạo sự kiện\" hoặc thêm một sự kiện từ thư viện bên dưới để bắt đầu."
   },
   "library": {
     "VN_EVENTS": [
