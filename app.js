@@ -208,13 +208,9 @@ function tick() {
 }
 
 // ===== Hàm xây dựng =====
+// ===== Hàm xây dựng (ĐÃ SỬA LỖI) =====
 function buildMyEventsSkeleton() {
   const items = CUSTOM_EVENTS.sort((a, b) => a.date - b.date);
-  
-  el.countdownList.classList.remove('layout-single');
-  if (items.length === 1) {
-    el.countdownList.classList.add('layout-single');
-  }
 
   if (items.length === 0) {
     el.countdownList.innerHTML = '';
