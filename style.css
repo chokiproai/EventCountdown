@@ -295,3 +295,24 @@ body{
     margin-bottom: 8px;
   }
 }
+/* Nút xoá cho sự kiện tuỳ chỉnh */
+.item-actions .btn[data-act="delete"] {
+  background: var(--control-bg);
+  color: #ef4444; /* Chữ đỏ */
+  border-color: #ef444433; /* Viền đỏ mờ */
+}
+.item-actions .btn[data-act="delete"]:hover {
+  background: #ef4444;
+  color: #fff;
+  border-color: #ef4444;
+}
+
+html.dark .item-actions .btn[data-act="delete"] {
+  color: #f87171; /* Chữ đỏ nhạt */
+  border-color: #f8717133;
+}
+html.dark .item-actions .btn[data-act="delete"]:hover {
+  background: #ef4444;
+  color: #fff;
+  border-color: #ef4444;
+}
