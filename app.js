@@ -182,8 +182,7 @@ function apply(){
   let t = parseInputToDate(); if(!t){ el.status.textContent=getString('statusDateError'); shake(el.modalDate); return; } 
   const bumped = bumpToFuture(new Date(t)); if(bumped){ t = bumped.date; el.modalDate.value = dateToInputString(t, el.tzSelect.value); } 
   const rawTitle = (el.modalTitle.value?.trim()||getString('defaultEventTitle')); 
-  el.modalTitle.value = syncTitleYearToDate(rawTitle, t); 
-  el.status.textContent=getString('statusStarted'); 
+  el.modalTitle.value = syncTitleYearToDate(rawTitle, t);  
   
   const exists = CUSTOM_EVENTS.some(ev => ev.date.toISOString() === t.toISOString() && ev.title === el.modalTitle.value); 
   if (!exists) { 
