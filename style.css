@@ -316,3 +316,30 @@ html.dark .item-actions .btn[data-act="delete"]:hover {
   color: #fff;
   border-color: #ef4444;
 }
+.item-actions .btn[data-act="delete"] {
+  background: var(--control-bg); color: #ef4444; border-color: #ef444433;
+}
+.item-actions .btn[data-act="delete"]:hover {
+  background: #ef4444; color: #fff; border-color: #ef4444;
+}
+html.dark .item-actions .btn[data-act="delete"] {
+  color: #f87171; border-color: #f8717133;
+}
+html.dark .item-actions .btn[data-act="delete"]:hover {
+  background: #ef4444; color: #fff; border-color: #ef4444;
+}
+
+/* [MỚI] Định dạng cho đếm ngược mini trong "Sự kiện của tôi" */
+.mini-countdown {
+  font-weight: 600;
+  font-family: var(--mono-font, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
+  padding: 2px 6px;
+  border-radius: 6px;
+  background-color: var(--primary-press);
+  color: #fff;
+  font-size: 12px;
+}
+.mini-countdown.past {
+  background-color: var(--muted);
+  color: var(--fg);
+}

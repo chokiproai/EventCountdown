@@ -60,7 +60,10 @@
     "tzLocal": "Local (Yours)",
     "btnDelete": "Delete",
     "customEventNote": "My Event",
-    "libLoadError": "Error loading event library. Please reload the page."
+    "libLoadError": "Error loading event library. Please reload the page.",
+    "myEventsHeading": "My Events",
+    "helperMini": "{d}d {h}h {m}m left",
+    "helperMiniPast": "Finished"
   },
   "library": {
     "VN_EVENTS": [],

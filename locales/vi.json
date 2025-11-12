@@ -60,7 +60,10 @@
     "tzLocal": "Cục bộ (của bạn)",
     "btnDelete": "Xoá",
     "customEventNote": "Sự kiện của bạn",
-    "libLoadError": "Lỗi tải thư viện sự kiện. Hãy thử tải lại trang."
+    "libLoadError": "Lỗi tải thư viện sự kiện. Hãy thử tải lại trang.",
+    "myEventsHeading": "Sự kiện của tôi",
+    "helperMini": "Còn {d}d {h}h {m}m",
+    "helperMiniPast": "Đã qua"
   },
   "library": {
     "VN_EVENTS": [

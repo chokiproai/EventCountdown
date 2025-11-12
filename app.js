@@ -13,76 +13,98 @@ const STORAGE_KEY_EVENTS = 'countdown_events';
 const STORAGE_KEY_ACTIVE_EVENT = 'countdown_active_event';
 let activeEventLoaded = false;
 
-// [THAY ĐỔI] Các biến này sẽ được điền từ JSON
 let VN_EVENTS = [];
 let LUNAR_TEMPLATED = [];
 let EDU_EVENTS = [];
-
-// [THAY ĐỔI] Biến chứa các chuỗi dịch (sẽ được tải)
 let STRINGS = {};
-
-// [THAY ĐỔI] Cache cho các tệp ngôn ngữ đã tải
 const LOADED_LOCALES = {}; 
 
-// [THAY ĐỔI] XÓA BỎ const LANG_STRINGS = {...} (đã chuyển sang JSON)
+const LANG_STRINGS_FALLBACK = {
+  'siteTitle': 'Event Countdown', 'createEventBtn': 'Create Event', 'defaultEventTitle': 'Your Event', 'defaultEventDate': 'Press "Create Event" to start.', 'statusDateError': '⚠️ Please enter a valid date and time.', 'statusStarted': '✅ Countdown started.', 'helperComplete': '🎉 The event is here!', 'themeAuto': 'Auto', 'themeLight': 'Light', 'themeDark': 'Dark', 'tzLocal': 'Local (Yours)',
+};
 
-/** [CẬP NHẬT] Lấy chuỗi dịch từ biến STRINGS */
+/** Lấy chuỗi dịch */
 function getString(key) {
-  // Hàm `helperCountdown` đặc biệt, cần xử lý riêng
   if (key === 'helperCountdown') {
     const template = STRINGS[key] || '{d} days {h}:{m}:{s} left';
-    return (d,h,m,s) => template
-      .replace('{d}', d)
-      .replace('{h}', h)
-      .replace('{m}', m)
-      .replace('{s}', s);
+    return (d,h,m,s) => template.replace('{d}', d).replace('{h}', h).replace('{m}', m).replace('{s}', s);
   }
-  
-  const str = STRINGS[key];
-  if (str) return str;
-  
-  // Fallback (dùng nếu key không tồn tại)
-  const fallback = LANG_STRINGS_FALLBACK[key];
-  if (fallback) return fallback;
-  
+  // [MỚI] Thêm hàm đếm ngược mini
+  if (key === 'helperMini') {
+    const template = STRINGS[key] || '{d}d {h}h {m}m';
+    return (d,h,m) => template.replace('{d}', d).replace('{h}', h).replace('{m}', m);
+  }
+  const str = STRINGS[key]; if (str) return str;
+  const fallback = LANG_STRINGS_FALLBACK[key]; if (fallback) return fallback;
   return key;
 }
 
-// [MỚI] Thêm một bộ đệm (fallback) tiếng Anh tối thiểu
-// đề phòng tệp JSON bị lỗi
-const LANG_STRINGS_FALLBACK = {
-  'siteTitle': 'Event Countdown',
-  'createEventBtn': 'Create Event',
-  'defaultEventTitle': 'Your Event',
-  'defaultEventDate': 'Press "Create Event" to start.',
-  'statusDateError': '⚠️ Please enter a valid date and time.',
-  'statusStarted': '✅ Countdown started.',
-  'helperComplete': '🎉 The event is here!',
-  'themeAuto': 'Auto',
-  'themeLight': 'Light',
-  'themeDark': 'Dark',
-  'tzLocal': 'Local (Yours)',
-};
-
-// ===== Element cache (Không thay đổi) =====
+// ===== Element cache (CẬP NHẬT) =====
 const el = {
+  // popup form
   modal: $('#modal'), modalTitle: $('#title'), modalDate: $('#date'), 
   tzSelect: $('#tzSelect'), modalApply: $('#apply'), modalIcs: $('#ics'), modalShare: $('#share'), modalClose: $('#modalClose'),
+  // island button
   islandCreate: $('#islandCreate'),
+  // main countdown
   d: $('#d'), h: $('#h'), m: $('#m'), s: $('#s'),
   displayTitle: $('#displayTitle'), displayDate: $('#displayDate'),
   helper: $('#helper'), bar: $('#bar'), progressBar: $('#progress-bar'),
-  search: $('#search'), list: $('#list'), year: $('#year'),
+  // library
   librarySection: $('#librarySection'),
+  search: $('#search'), list: $('#list'), year: $('#year'),
+  // [MỚI] My Events
+  myEventsSection: $('#myEventsSection'),
+  myEventsList: $('#my-events-list'),
+  // misc
   status: $('#status'), urlStatus: $('#urlStatus'),
   langSwitch: $('#langSwitch'), themeSelect: $('#themeSelect'),
   settingsToggle: $('#settingsToggle'), settingsDropdown: $('#settingsDropdown'),
 };
 
-// ===== Hàm Lưu/Tải/Xoá (Không thay đổi) =====
+// ===== Hàm Lưu/Tải/Xoá (CẬP NHẬT) =====
 function saveCustomEvents() { try { localStorage.setItem(STORAGE_KEY_EVENTS, JSON.stringify(CUSTOM_EVENTS)); } catch (e) { console.error("Lỗi lưu sự kiện:", e); } }
 function loadCustomEvents() { const saved = localStorage.getItem(STORAGE_KEY_EVENTS); if (!saved) return; try { const parsed = JSON.parse(saved); parsed.forEach(ev => { CUSTOM_EVENTS.push({ title: ev.title, date: new Date(ev.date) }); }); } catch (e) { console.error("Lỗi tải sự kiện:", e); localStorage.removeItem(STORAGE_KEY_EVENTS); } }
-function deleteCustomEvent(isoString) { const index = CUSTOM_EVENTS.findIndex(ev => ev.date.toISOString() === isoString); if (index > -1) { CUSTOM_EVENTS.splice(index, 1); saveCustomEvents(); renderList(); updateYearOptions(parseInt(el.year.value, 10)); } }
+
+// [MỚI] Hàm reset đồng hồ chính
+function clearActiveCountdown() {
+  target = null;
+  startWhenSet = null;
+  localStorage.removeItem(STORAGE_KEY_ACTIVE_EVENT);
+  
+  // Reset giá trị trong modal (nguồn chân lý)
+  el.modalTitle.value = '';
+  el.modalDate.value = '';
+
+  // Reset hiển thị
+  el.d.textContent = 0;
+  el.h.textContent = fmt2(0);
+  el.m.textContent = fmt2(0);
+  el.s.textContent = fmt2(0);
+  
+  // Gọi updateLabels để điền text mặc định
+  updateLabels();
+}
+
+// [CẬP NHẬT] deleteCustomEvent
+function deleteCustomEvent(isoString) {
+  const index = CUSTOM_EVENTS.findIndex(ev => ev.date.toISOString() === isoString);
+  if (index > -1) {
+    // Lấy ISO của đồng hồ chính TRƯỚC KHI xoá
+    const activeISO = target ? target.toISOString() : null;
+    
+    // Xoá sự kiện
+    CUSTOM_EVENTS.splice(index, 1);
+    saveCustomEvents();
+    renderMyEventsList(); // Vẽ lại danh sách "My Events"
+    updateYearOptions(parseInt(el.year.value, 10)); // Cập nhật dropdown năm
+
+    // [MỚI] Kiểm tra và reset đồng hồ chính
+    if (activeISO === isoString) {
+      clearActiveCountdown();
+    }
+  }
+}
 
 function loadActiveEvent() {
   const saved = localStorage.getItem(STORAGE_KEY_ACTIVE_EVENT); if (!saved) return;
@@ -182,55 +204,217 @@ DESCRIPTION:Countdown: ${escapeICS(location.href)}
 END:VEVENT
 END:VCALENDAR`; const blob=new Blob([ics],{type:'text/calendar'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='event.ics'; document.body.appendChild(a); a.click(); a.remove(); }
 
-// ===== Apply countdown (Không thay đổi) =====
-function apply(){ let t = parseInputToDate(); if(!t){ el.status.textContent=getString('statusDateError'); shake(el.modalDate); return; } const bumped = bumpToFuture(new Date(t)); if(bumped){ t = bumped.date; el.modalDate.value = dateToInputString(t, el.tzSelect.value); } const rawTitle = (el.modalTitle.value?.trim()||getString('defaultEventTitle')); el.modalTitle.value = syncTitleYearToDate(rawTitle, t); target=t; startWhenSet=new Date(); el.status.textContent=getString('statusStarted'); try { const activeEvent = { title: el.modalTitle.value, date: t.toISOString(), }; localStorage.setItem(STORAGE_KEY_ACTIVE_EVENT, JSON.stringify(activeEvent)); } catch (e) { console.error("Lỗi lưu sự kiện đang đếm:", e); } const exists = CUSTOM_EVENTS.some(ev => ev.date.toISOString() === t.toISOString() && ev.title === el.modalTitle.value); if (!exists) { CUSTOM_EVENTS.push({ title: el.modalTitle.value, date: t }); saveCustomEvents(); } updateYearOptions(el.year.value ? parseInt(el.year.value,10) : t.getFullYear()); renderList(); updateLabels(); tick(); closeModal(); }
-
-// ===== Tick (CẬP NHẬT) =====
-function tick(){ 
-  const now=new Date(); 
-  // [CẬP NHẬT] Chỉ đọc 'target' (được set bởi apply() hoặc loadActiveEvent())
-  // Không cần gọi parseInputToDate() mỗi lần
-  const t = target;
-  if(!t) return; // Nếu không có sự kiện nào đang đếm, dừng lại
+// ===== Apply countdown (CẬP NHẬT) =====
+function apply(){ 
+  let t = parseInputToDate(); if(!t){ el.status.textContent=getString('statusDateError'); shake(el.modalDate); return; } 
+  const bumped = bumpToFuture(new Date(t)); if(bumped){ t = bumped.date; el.modalDate.value = dateToInputString(t, el.tzSelect.value); } 
+  const rawTitle = (el.modalTitle.value?.trim()||getString('defaultEventTitle')); 
+  el.modalTitle.value = syncTitleYearToDate(rawTitle, t); 
+  target=t; startWhenSet=new Date(); el.status.textContent=getString('statusStarted'); 
   
-  const diff=t-now, past=diff<=0, total=Math.abs(diff);
-  const sec=Math.floor(total/1000)%60, min=Math.floor(total/60000)%60, hr=Math.floor(total/3600000)%24, day=Math.floor(total/86400000); 
-  el.d.textContent=day; el.h.textContent=fmt2(hr); el.m.textContent=fmt2(min); el.s.textContent=fmt2(sec); 
+  try { const activeEvent = { title: el.modalTitle.value, date: t.toISOString(), }; localStorage.setItem(STORAGE_KEY_ACTIVE_EVENT, JSON.stringify(activeEvent)); } catch (e) { console.error("Lỗi lưu sự kiện đang đếm:", e); } 
   
-  if(startWhenSet && !past){ 
-    const totalDur=t-startWhenSet; const passed=now-startWhenSet; 
-    const pct=Math.min(100,Math.max(0,(passed/totalDur)*100)); 
-    el.bar.style.width=pct+'%'; el.progressBar.setAttribute('aria-valuenow', String(Math.round(pct))); 
-    // [CẬP NHẬT] Đảm bảo hàm helper được gọi đúng
-    el.helper.textContent = getString('helperCountdown')(day, fmt2(hr), fmt2(min), fmt2(sec)); 
-  } else if(past){ 
-    el.bar.style.width='100%'; el.progressBar.setAttribute('aria-valuenow','100'); 
-    el.helper.textContent=getString('helperComplete'); 
-  } 
-  setTimeout(tick,500); 
+  const exists = CUSTOM_EVENTS.some(ev => ev.date.toISOString() === t.toISOString() && ev.title === el.modalTitle.value); 
+  if (!exists) { CUSTOM_EVENTS.push({ title: el.modalTitle.value, date: t }); saveCustomEvents(); } 
+  
+  updateYearOptions(el.year.value ? parseInt(el.year.value,10) : t.getFullYear()); 
+  
+  // [CẬP NHẬT] Chỉ render danh sách "My Events"
+  renderMyEventsList(); 
+  
+  updateLabels(); 
+  // [XÓA] tick() sẽ được gọi bởi vòng lặp toàn cục
+  // tick(); 
+  closeModal(); 
 }
 
-// ===== Library render (Không thay đổi) =====
-function renderList(){ const now = new Date(); const currentYear = now.getFullYear(); const selectedYear = parseInt(el.year.value || currentYear, 10); const q = (el.search.value || '').toLowerCase(); const customItems = CUSTOM_EVENTS .filter(it => it.date.getFullYear() === selectedYear) .map(it => ({ name: it.title, date: it.date, note: getString('customEventNote'), emoji: '👤', isCustom: true })); 
-  const libItems = (VN_EVENTS.length === 0 && LUNAR_TEMPLATED.length === 0) ? [] : buildLibraryForYear(selectedYear); 
-  const items = [...libItems, ...customItems] .sort((a,b) => a.date - b.date) .filter(it => it.name.toLowerCase().includes(q)); el.list.innerHTML = ''; items.forEach(it => { let isPast; if (selectedYear < currentYear) isPast = true; else if (selectedYear > currentYear) isPast = false; else isPast = it.date < now; const when = new Intl.DateTimeFormat(currentLang, { dateStyle: 'full', timeStyle: 'short' }).format(it.date); const li = document.createElement('li'); li.className = 'card-item' + (isPast ? ' past' : ''); const deleteBtn = it.isCustom ? `<button class="btn" data-act="delete" data-iso="${it.date.toISOString()}" title="${getString('btnDelete')}"> ${getString('btnDelete')} </button>` : ''; li.innerHTML = ` <div class="item-left"> <div class="emoji">${it.emoji || '📅'}</div> <div class="item-meta"> <div class="item-title">${it.name}</div> <div class="item-sub">${when}${it.note ? ' · ' + it.note : ''}${isPast ? ' · ' + getString('pastSuffix') : ''}</div> </div> </div> <div class="item-actions"> ${deleteBtn} <button class="btn" data-act="create" ${isPast ? `disabled aria-disabled="true" title="${getString('pastEventTitle')}"` : ''}> ${getString('modalBtnApply')} </button> </div> `; if (it.isCustom) { li.querySelector('[data-act="delete"]').addEventListener('click', (e) => { e.stopPropagation(); deleteCustomEvent(e.currentTarget.dataset.iso); }); } if (!isPast) { li.querySelector('[data-act="create"]').addEventListener('click', () => { openModal({ name: it.name, date: it.date }); }); } el.list.appendChild(li); }); }
+// ===== [THAY ĐỔI] Tách `tick()` thành 3 hàm =====
 
-// ===== [THAY ĐỔI] Hàm `loadEventLibrary` đã được đơn giản hóa =====
-/** Đọc dữ liệu thư viện từ một đối tượng đã tải */
-function loadEventLibrary(libraryData) {
-  // Xoá thư viện cũ
-  VN_EVENTS = [];
-  LUNAR_TEMPLATED = [];
-  EDU_EVENTS = [];
+/** Vòng lặp chính, chạy mỗi 500ms */
+function tick() {
+  updateMainCountdown();  // Cập nhật đồng hồ chính
+  renderMyEventsList();   // Cập nhật danh sách "Sự kiện của tôi" (bao gồm mini-countdowns)
+  
+  setTimeout(tick, 500); // Lên lịch chạy lại
+}
 
-  // Nếu không có thư viện (VD: tiếng Anh)
+/** Cập nhật đồng hồ đếm ngược chính */
+function updateMainCountdown() {
+  const now = new Date();
+  const t = target; // Chỉ đọc từ 'target' toàn cục
+  
+  if (!t) {
+    // Nếu không có 'target', đảm bảo thanh tiến trình trống
+    el.bar.style.width = '0%';
+    el.progressBar.setAttribute('aria-valuenow', '0');
+    el.helper.textContent = '';
+    return; // Dừng
+  }
+
+  const diff = t - now;
+  const past = diff <= 0;
+  const total = Math.abs(diff);
+  const sec = Math.floor(total / 1000) % 60;
+  const min = Math.floor(total / 60000) % 60;
+  const hr = Math.floor(total / 3600000) % 24;
+  const day = Math.floor(total / 86400000);
+  
+  el.d.textContent = day;
+  el.h.textContent = fmt2(hr);
+  el.m.textContent = fmt2(min);
+  el.s.textContent = fmt2(sec);
+  
+  if (startWhenSet && !past) {
+    const totalDur = t - startWhenSet;
+    const passed = now - startWhenSet;
+    const pct = Math.min(100, Math.max(0, (passed / totalDur) * 100));
+    el.bar.style.width = pct + '%';
+    el.progressBar.setAttribute('aria-valuenow', String(Math.round(pct)));
+    el.helper.textContent = getString('helperCountdown')(day, fmt2(hr), fmt2(min), fmt2(sec));
+  } else if (past) {
+    el.bar.style.width = '100%';
+    el.progressBar.setAttribute('aria-valuenow', '100');
+    el.helper.textContent = getString('helperComplete');
+  }
+}
+
+// ===== [THAY ĐỔI] Tách hàm render =====
+
+/** [MỚI] Chỉ vẽ danh sách "Sự kiện của tôi" (được gọi bởi tick()) */
+function renderMyEventsList() {
+  const now = new Date();
+  const q = (el.search.value || '').toLowerCase();
+
+  // Sắp xếp theo ngày gần nhất
+  const items = CUSTOM_EVENTS
+    .filter(it => it.title.toLowerCase().includes(q))
+    .sort((a, b) => a.date - b.date);
+
+  if (items.length === 0) {
+    el.myEventsSection.setAttribute('hidden', '');
+    el.myEventsList.innerHTML = '';
+  } else {
+    el.myEventsSection.removeAttribute('hidden');
+    el.myEventsList.innerHTML = ''; // Xóa và vẽ lại
+  }
+
+  items.forEach(it => {
+    const diff = it.date - now;
+    const past = diff <= 0;
+    const total = Math.abs(diff);
+    
+    // Tính toán mini
+    const m_total = Math.floor(total / 60000);
+    const d = Math.floor(m_total / 1440); // 1440 phút/ngày
+    const h = Math.floor((m_total % 1440) / 60);
+    const m = m_total % 60;
+
+    let miniCountdownText;
+    let miniClass = 'mini-countdown';
+    
+    if (past) {
+      miniCountdownText = getString('helperMiniPast');
+      miniClass += ' past';
+    } else {
+      miniCountdownText = getString('helperMini')(d, fmt2(h), fmt2(m));
+    }
+
+    const when = new Intl.DateTimeFormat(currentLang, { dateStyle: 'full', timeStyle: 'short' }).format(it.date);
+    const li = document.createElement('li');
+    li.className = 'card-item' + (past ? ' past' : '');
+
+    const deleteBtn = `<button class="btn" data-act="delete" data-iso="${it.date.toISOString()}" title="${getString('btnDelete')}"> ${getString('btnDelete')} </button>`;
+    
+    // [CẬP NHẬT] Ghi đè `.item-sub` bằng `.mini-countdown`
+    li.innerHTML = `
+      <div class="item-left">
+        <div class="emoji">👤</div>
+        <div class="item-meta">
+          <div class="item-title">${it.title}</div>
+          <div class="item-sub">${when}</div>
+        </div>
+      </div>
+      <div class="item-actions">
+        <span class="${miniClass}">${miniCountdownText}</span>
+        ${deleteBtn}
+        <button class="btn" data-act="create" ${past ? `disabled aria-disabled="true" title="${getString('pastEventTitle')}"` : ''}>
+          ${getString('modalBtnApply')}
+        </button>
+      </div>
+    `;
+
+    li.querySelector('[data-act="delete"]').addEventListener('click', (e) => {
+      e.stopPropagation();
+      deleteCustomEvent(e.currentTarget.dataset.iso);
+    });
+    
+    // Nút "Bắt đầu đếm" trên thẻ "My Event"
+    li.querySelector('[data-act="create"]').addEventListener('click', () => {
+      // Điền thông tin vào modal và gọi apply()
+      el.modalTitle.value = it.title;
+      el.modalDate.value = dateToInputString(it.date, tzName);
+      el.tzSelect.value = tzName;
+      apply(); // Áp dụng ngay lập tức
+    });
+    
+    el.myEventsList.appendChild(li);
+  });
+}
+
+/** [MỚI] Chỉ vẽ danh sách "Thư viện sự kiện" */
+function renderLibraryList() {
+  const now = new Date(); 
+  const currentYear = now.getFullYear(); 
+  const selectedYear = parseInt(el.year.value || currentYear, 10); 
+  const q = (el.search.value || '').toLowerCase(); 
+  
+  const libItems = (VN_EVENTS.length === 0 && LUNAR_TEMPLATED.length === 0) ? [] : buildLibraryForYear(selectedYear);
+  const items = libItems.filter(it => it.name.toLowerCase().includes(q));
+  
+  el.list.innerHTML = ''; // Chỉ xóa danh sách thư viện
+  
+  items.forEach(it => { 
+    let isPast; 
+    if (selectedYear < currentYear) isPast = true; 
+    else if (selectedYear > currentYear) isPast = false; 
+    else isPast = it.date < now; 
+    
+    const when = new Intl.DateTimeFormat(currentLang, { dateStyle: 'full', timeStyle: 'short' }).format(it.date); 
+    const li = document.createElement('li'); 
+    li.className = 'card-item' + (isPast ? ' past' : ''); 
+    
+    li.innerHTML = ` 
+      <div class="item-left"> 
+        <div class="emoji">${it.emoji || '📅'}</div> 
+        <div class="item-meta"> 
+          <div class="item-title">${it.name}</div> 
+          <div class="item-sub">${when}${it.note ? ' · ' + it.note : ''}${isPast ? ' · ' + getString('pastSuffix') : ''}</div> 
+        </div> 
+      </div> 
+      <div class="item-actions"> 
+        <button class="btn" data-act="create" ${isPast ? `disabled aria-disabled="true" title="${getString('pastEventTitle')}"` : ''}> 
+          ${getString('modalBtnApply')} 
+        </button> 
+      </div> 
+    `; 
+    
+    if (!isPast) { 
+      li.querySelector('[data-act="create"]').addEventListener('click', () => { 
+        openModal({ name: it.name, date: it.date }); 
+      }); 
+    } 
+    el.list.appendChild(li); 
+  }); 
+}
+
+// ===== [CẬP NHẬT] Hàm `loadEventLibrary` =====
+async function loadEventLibrary(libraryData) {
+  VN_EVENTS = []; LUNAR_TEMPLATED = []; EDU_EVENTS = [];
   if (!libraryData || Object.keys(libraryData).length === 0) {
     console.log(`Không có thư viện cho ngôn ngữ: ${currentLang}`);
     el.librarySection.setAttribute('hidden', '');
     return;
   }
-
-  // Gán dữ liệu thư viện
   VN_EVENTS = libraryData.VN_EVENTS || [];
   LUNAR_TEMPLATED = libraryData.LUNAR_TEMPLATED || [];
   EDU_EVENTS = libraryData.EDU_EVENTS || [];
@@ -241,48 +425,37 @@ function loadEventLibrary(libraryData) {
 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
 function populateTimezoneSelect() { const currentTZ = el.tzSelect.value || tzName; el.tzSelect.innerHTML = ''; const localOpt = new Option(`${getString('tzLocal')} (${tzName})`, tzName); el.tzSelect.add(localOpt); const sep = new Option('---', ''); sep.disabled = true; el.tzSelect.add(sep); try { const timezones = Intl.supportedValuesOf('timeZone'); timezones.filter(tz => tz !== tzName).forEach(tz => { const opt = new Option(tz.replace(/_/g, ' '), tz); el.tzSelect.add(opt); }); } catch (e) { console.warn("Không thể tải danh sách múi giờ."); } if (Array.from(el.tzSelect.options).some(opt => opt.value === currentTZ)) { el.tzSelect.value = currentTZ; } else { el.tzSelect.value = tzName; } }
 
-// [CẬP NHẬT] Hàm `setLanguage` là nơi tải JSON
 async function setLanguage(lang) {
-  // Mặc định là 'en' nếu không tìm thấy
-  if (!['vi', 'en'].includes(lang)) {
-    lang = 'en';
-  }
-  
+  if (!['vi', 'en'].includes(lang)) { lang = 'en'; }
   currentLang = lang;
   document.documentElement.lang = lang;
   localStorage.setItem('countdown_lang', lang);
   el.langSwitch.value = lang;
-
-  // Trường hợp 1: Đã có trong cache
+  
   if (LOADED_LOCALES[lang]) {
     console.log(`Sử dụng ngôn ngữ từ cache: ${lang}`);
     const data = LOADED_LOCALES[lang];
     STRINGS = data.strings;
     loadEventLibrary(data.library);
-  } 
-  // Trường hợp 2: Phải tải tệp JSON mới
-  else {
+  } else {
     try {
       console.log(`Đang tải ngôn ngữ: locales/${lang}.json`);
       const response = await fetch(`locales/${lang}.json`);
       if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
       const data = await response.json();
-      
       STRINGS = data.strings;
       loadEventLibrary(data.library);
-      LOADED_LOCALES[lang] = data; // Lưu vào cache
-      
+      LOADED_LOCALES[lang] = data;
     } catch (error) {
       console.error(`Lỗi tải tệp ngôn ngữ (${lang}):`, error);
-      // Dùng fallback nếu lỗi
       STRINGS = LANG_STRINGS_FALLBACK;
-      loadEventLibrary({}); // Tải thư viện trống
+      loadEventLibrary({});
       el.librarySection.innerHTML = `<p>${getString('libLoadError')}</p>`;
       el.librarySection.removeAttribute('hidden');
     }
   }
 
-  // Dịch các chuỗi tĩnh (dùng STRINGS mới)
+  // Dịch các chuỗi tĩnh
   document.querySelectorAll('[data-lang]').forEach(node => { if (node.tagName === 'OPTION') return; node.textContent = getString(node.dataset.lang); });
   document.querySelectorAll('#themeSelect option[data-lang]').forEach(node => { node.textContent = getString(node.dataset.lang); });
   document.querySelectorAll('[data-lang-placeholder]').forEach(node => { node.placeholder = getString(node.dataset.langPlaceholder); });
@@ -292,14 +465,15 @@ async function setLanguage(lang) {
   // Cập nhật các phần động
   populateTimezoneSelect();
   updateLabels();
-  renderList();
+  renderLibraryList();  // [MỚI] Vẽ lại thư viện
+  renderMyEventsList(); // [MỚI] Vẽ lại sự kiện của tôi
   updateYearOptions(parseInt(el.year.value, 10));
 }
 function applyTheme(theme) { if (theme === 'dark') { document.documentElement.classList.add('dark'); } else { document.documentElement.classList.remove('dark'); } }
 function setTheme(theme) { currentTheme = theme; localStorage.setItem('countdown_theme', theme); el.themeSelect.value = theme; if (theme === 'auto') { applyTheme(prefersDark.matches ? 'dark' : 'light'); } else { applyTheme(theme); } }
 prefersDark.addEventListener('change', (e) => { if (currentTheme === 'auto') { applyTheme(e.matches ? 'dark' : 'light'); } });
 
-// ===== Events (Không thay đổi) =====
+// ===== Events (CẬP NHẬT) =====
 el.modalApply.addEventListener('click', apply);
 el.modalShare.addEventListener('click', copyShare);
 el.modalIcs.addEventListener('click', makeICS);
@@ -310,7 +484,16 @@ el.islandCreate.addEventListener('click', ()=> openModal());
 $('#modalClose').addEventListener('click', closeModal);
 el.modal.addEventListener('click', (e)=>{ if(e.target===el.modal) closeModal(); });
 document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && el.modal.getAttribute('aria-hidden')==='false') closeModal(); });
-['input','change'].forEach(ev=>{ el.search.addEventListener(ev, renderList); el.year.addEventListener(ev, renderList); });
+
+// [CẬP NHẬT] Sự kiện tìm kiếm và năm
+el.search.addEventListener('input', () => {
+  renderLibraryList();
+  renderMyEventsList();
+});
+el.year.addEventListener('change', () => {
+  renderLibraryList(); // Chỉ cần render lại thư viện
+});
+
 el.langSwitch.addEventListener('change', () => { setLanguage(el.langSwitch.value); toggleSettings(false); });
 el.themeSelect.addEventListener('change', () => { setTheme(el.themeSelect.value); });
 function toggleSettings(show) { const isHidden = el.settingsDropdown.hasAttribute('hidden'); if (show === true || (show !== false && isHidden)) { el.settingsDropdown.removeAttribute('hidden'); el.settingsToggle.setAttribute('aria-expanded', 'true'); } else { el.settingsDropdown.setAttribute('hidden', ''); el.settingsToggle.setAttribute('aria-expanded', 'false'); } }
@@ -353,7 +536,10 @@ async function boot(){
   
   // 6. Cập nhật lần cuối
   updateLabels();
-  renderList();
+  renderLibraryList();  // [THAY ĐỔI]
+  renderMyEventsList(); // [THAY ĐỔI]
+  
+  // [THAY ĐỔI] Bắt đầu vòng lặp tick() toàn cục
   tick();
 }
 
