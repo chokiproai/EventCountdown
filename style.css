@@ -118,13 +118,19 @@ body{
 .small{font-size:12px}
 .mono{font-family:var(--mono-font)}
 
-
 /* ---- KHU VỰC DASHBOARD SỰ KIỆN CỦA TÔI ---- */
 
 .countdown-list-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 16px;
+}
+.countdown-list-grid.layout-single {
+  justify-items: center;
+}
+.countdown-list-grid.layout-single .event-card {
+  max-width: 400px;
+  width: 100%;
 }
 
 /* Thẻ đếm ngược (Event Card) */

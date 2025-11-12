@@ -50,13 +50,9 @@ const el = {
 function initAudioUnlock() {
   function unlockAudio() {
     console.log('Audio context unlocked by user interaction.');
-    // Chỉ cần load() là đủ để "đánh thức" trình duyệt
-    // và cho phép .play() sau này
     el.alarmSound.load();
   }
-  // Lắng nghe click đầu tiên bất kỳ
   document.addEventListener('click', unlockAudio, { once: true });
-  // Thêm cả touchstart cho di động
   document.addEventListener('touchstart', unlockAudio, { once: true });
 }
 
@@ -73,13 +69,13 @@ function playAlarm(times) {
       console.error("Lỗi phát âm thanh:", e);
     }
     if (count < times) {
-      setTimeout(play, 1500); // Đặt khoảng trễ 1.5 giây
+      setTimeout(play, 1500);
     }
   }
   play();
 }
 
-// ===== Hàm Lưu/Tải/Xoá   =====
+// ===== Hàm Lưu/Tải/Xoá =====
 function saveCustomEvents() { try { localStorage.setItem(STORAGE_KEY_EVENTS, JSON.stringify(CUSTOM_EVENTS)); } catch (e) { console.error("Lỗi lưu sự kiện:", e); } }
 
 function loadCustomEvents() { 
@@ -214,6 +210,11 @@ function tick() {
 // ===== Hàm xây dựng =====
 function buildMyEventsSkeleton() {
   const items = CUSTOM_EVENTS.sort((a, b) => a.date - b.date);
+  
+  el.countdownList.classList.remove('layout-single');
+  if (items.length === 1) {
+    el.countdownList.classList.add('layout-single');
+  }
 
   if (items.length === 0) {
     el.countdownList.innerHTML = '';
@@ -264,7 +265,7 @@ function buildMyEventsSkeleton() {
   updateEventCards();
 }
 
-// ===== Hàm Cập nhật Thẻ (CẬP NHẬT) =====
+// ===== Hàm Cập nhật Thẻ =====
 function updateEventCards() {
   const now = new Date();
   
@@ -303,7 +304,6 @@ function updateEventCards() {
       el_helper.textContent = getString('helperComplete');
       el_card.classList.add('past');
       
-      // [CẬP NHẬT] Logic phát âm thanh
       if (!it.isFinished) {
         playAlarm(3);
         it.isFinished = true;
@@ -447,13 +447,13 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !el.sett
 el.settingsDropdown.addEventListener('click', (e) => e.stopPropagation());
 function applyHashPreset(){ const h=(location.hash||'').toLowerCase(); if(!h) return; const y = parseInt(el.year.value || new Date().getFullYear(), 10); let t; if(h==='#tomorrow'){ t = new Date(y, new Date().getMonth(), new Date().getDate()+1, 9, 0, 0); } else if(h==='#in-1h'){ t = new Date(); t.setHours(t.getHours()+1); } else if(h==='#in-10m'){ t = new Date(); t.setMinutes(t.getMinutes()+10); } else return; el.modalDate.value = dateToInputString(t, tzName); el.tzSelect.value = tzName; openModal(); }
 
-// ===== Tests (console) =====
+// ===== Tests =====
 function runTests(){ const dUtc=new Date(Date.UTC(2025,0,2,3,4,5)); console.assert(icsDate(dUtc)==='20250102T030405Z','icsDate failed'); const cases=[ {input:'commas,semis;back\\slash', expect:'commas\\,semis\\;back\\\\slash'}, {input:'line\nbreak', expect:'line\\nbreak'}, ]; cases.forEach((c,i)=>{ const got=escapeICS(c.input); console.assert(got===c.expect, 'escapeICS '+i); }); 
   console.assert(typeof buildLibraryForYear==='function' && (VN_EVENTS.length > 0 || EDU_EVENTS.length > 0 || LOADED_LOCALES['vi']), 'library build failed or empty');
 }
 
 
-// ===== Boot (CẬP NHẬT) =====
+// ===== Boot =====
 async function boot(){
   loadCustomEvents();
   
@@ -464,17 +464,14 @@ async function boot(){
   
   const savedTheme = localStorage.getItem('countdown_theme') || 'auto';
   setTheme(savedTheme);
-  
   updateYearOptions();
   initFromURL();       
   applyHashPreset();
-  runTests();          
+  runTests();
   initAudioUnlock();
-  
   updateLabels();
   buildMyEventsSkeleton();
   renderLibraryList();
-  
   tick();
 }
 
