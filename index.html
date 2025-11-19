@@ -4,131 +4,116 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Event Countdown</title>
-  <meta name="description" content="Simple event countdown with Vietnamese presets. Works offline, pure static." />
-  <meta name="color-scheme" content="light dark" />
-  <meta name="theme-color" content="#ace0f9" />
+  <meta name="theme-color" content="#0f172a" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 </head>
 <body>
+  <div class="bg-ambient"></div>
 
-  <div class="floating-actions-area">
-    <button id="islandCreate" class="island-btn" aria-haspopup="dialog" aria-controls="modal" aria-label="Tạo sự kiện" data-lang-aria="modalTitle">
-      <span class="island-icon">＋</span>
-      <span data-lang="createEventBtn">Tạo sự kiện</span>
-    </button>
-    
-    <div class="settings-menu">
-      <button id="settingsToggle" class="icon-btn settings-btn" aria-label="Cài đặt" data-lang-aria="settingsAria" aria-haspopup="true" aria-expanded="false">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="20" height="20">
-          <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
-        </svg>
-      </button>
-      <div id="settingsDropdown" class="settings-dropdown" role="menu" hidden>
-        <div class="setting-item">
-          <label for="langSwitch" data-lang="modalLabelLang">Ngôn ngữ</label>
-          <select id="langSwitch" class="select" aria-label="Ngôn ngữ / Language">
-            <option value="vi">Tiếng Việt</option>
-            <option value="en">English</option>
-          </select>
+  <div class="app-container">
+    <header class="glass-header">
+      <div class="header-left">
+        <h1 class="site-title" data-lang="siteTitle">Event Countdown</h1>
+      </div>
+      
+      <div class="header-right">
+        <div class="settings-wrapper">
+          <button id="settingsToggle" class="icon-btn" aria-label="Cài đặt">⚙️</button>
+          <div id="settingsDropdown" class="glass-dropdown" hidden>
+            <div class="setting-item">
+              <label data-lang="modalLabelLang">Ngôn ngữ</label>
+              <select id="langSwitch" class="glass-select simple">
+                <option value="vi">Tiếng Việt</option>
+                <option value="en">English</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <label data-lang="modalLabelTheme">Giao diện</label>
+              <select id="themeSelect" class="glass-select simple">
+                <option value="auto" data-lang="themeAuto">Tự động</option>
+                <option value="light" data-lang="themeLight">Sáng</option>
+                <option value="dark" data-lang="themeDark">Tối</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="bento-grid">
+      <section class="bento-card hero-card" id="islandCreate">
+        <div class="hero-content">
+          <div class="badge-new">✨ HeLLO</div>
+          <h2 data-lang="createEventBtn">Tạo sự kiện</h2>
+          <p data-lang="defaultEventDate" style="font-size: 0.9rem; opacity: 0.7;">Nhấn để bắt đầu...</p>
+        </div>
+        <button class="btn-3d-add">＋</button>
+      </section>
+
+      <section id="main-countdown-section" class="bento-card list-card">
+        <div class="card-header" style="margin-bottom: 16px;">
+          <h3 data-lang="myEventsHeading" style="margin:0">Sự kiện của tôi</h3>
         </div>
         
-        <div class="setting-item">
-          <label for="themeSelect" data-lang="modalLabelTheme">Giao diện</label>
-          <select id="themeSelect" class="select">
-            <option value="auto" data-lang="themeAuto">Tự động</option>
-            <option value="light" data-lang="themeLight">Sáng</option>
-            <option value="dark" data-lang="themeDark">Tối</option>
-          </select>
+        <div id="countdown-list" class="events-grid"></div>
+
+        <div id="countdown-empty-placeholder" class="empty-state" hidden style="text-align: center; padding: 40px; opacity: 0.6;">
+          <div style="font-size: 3rem;">🍃</div>
+          <p data-lang="myEventsEmptyBody">Chưa có sự kiện nào...</p>
         </div>
-      </div>
-    </div>
+        
+        <div class="status-bar" style="margin-top: 12px; font-size: 0.8rem; opacity: 0.6;">
+           <span id="status"></span> <span id="urlStatus" hidden></span>
+        </div>
+      </section>
+
+      <section id="librarySection" class="bento-card library-card">
+        <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h3 data-lang="libHeading" style="margin:0">Thư viện</h3>
+          <select id="year" class="glass-select small"></select>
+        </div>
+        <div class="search-box">
+          <input id="search" class="glass-input" data-lang-placeholder="searchPlaceholder" />
+        </div>
+        <ul id="list" class="library-list"></ul>
+      </section>
+    </main>
   </div>
 
-
-  <header class="site-header">
-    <div class="container">
-      <h1 class="site-title" data-lang="siteTitle">Event Countdown</h1>
-    </div>
-  </header>
-
-  <main class="container">
-
-    <section id="main-countdown-section" aria-labelledby="my-events-heading" class="card">
-    <h2 id="my-events-heading" data-lang="myEventsHeading">Sự kiện của tôi</h2>
-    
-    <div id="countdown-list" class="countdown-list-grid">
+  <div id="modal" class="modal-overlay" aria-hidden="true">
+    <div class="modal-glass">
+      <div class="modal-header">
+        <h3 data-lang="modalTitle" style="margin:0">Tạo sự kiện</h3>
+        <button id="modalClose" class="close-btn">✕</button>
       </div>
-    
-    <div id="countdown-empty-placeholder" class="empty-placeholder" hidden>
-      <h3 data-lang="myEventsEmptyHeading">Chưa có sự kiện nào</h3>
-      <p data-lang="myEventsEmptyBody">Nhấn "Tạo sự kiện" hoặc thêm một sự kiện từ thư viện bên dưới để bắt đầu.</p>
-    </div>
-
-    <div class="helper-row" style="border-top: 1px solid var(--line); margin-top: 16px; padding-top: 12px;">
-      <span class="muted"><span data-lang="urlStatusLabel">Trạng thái URL:</span> <span id="urlStatus" class="mono"></span></span>
-      <span id="status" class="status" role="status" aria-live="polite"></span>
-    </div>
-    </section>
-      
-      <div id="countdown-list" class="countdown-list-grid">
-        </div>
-      
-      <div id="countdown-empty-placeholder" class="empty-placeholder" hidden>
-        <h3 data-lang="myEventsEmptyHeading">Chưa có sự kiện nào</h3>
-        <p data-lang="myEventsEmptyBody">Nhấn "Tạo sự kiện" hoặc thêm một sự kiện từ thư viện bên dưới để bắt đầu.</p>
-      </div>
-    </section>
-
-    <section id="librarySection" aria-labelledby="lib-heading" class="card">
-      <div class="lib-head">
-        <h2 id="lib-heading" data-lang="libHeading">Thư viện sự kiện Việt Nam</h2>
-        <div class="lib-controls">
-          <input id="search" class="input" placeholder="Tìm: Tết, 30/4, Quốc khánh, Trung thu, THPTQG..." data-lang-placeholder="searchPlaceholder" />
-          <select id="year" class="select"></select>
-        </div>
-      </div>
-      <ul id="list" class="cards" aria-label="Danh sách sự kiện có sẵn">
-        </ul>
-      <p class="muted small" data-lang="libNote">
-        ⚠️ Một số mốc theo âm lịch là ước tính (tham khảo); ngày dương có thể thay đổi từng năm.
-      </p>
-    </section>
-  </main>
-
-  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
-    <div class="modal-card">
-      <div class="modal-head">
-        <h3 id="modal-title" data-lang="modalTitle">Tạo sự kiện</h3>
-        <button id="modalClose" class="icon-btn" aria-label="Đóng" data-lang-aria="modalCloseLabel">✕</button>
-      </div>
-
       <div class="modal-body">
-        <label class="field">
-          <span class="label" data-lang="modalLabelTitle">Tên sự kiện</span>
-          <input id="title" class="input" placeholder="VD: Giao thừa {yyyy}, Sinh nhật..." data-lang-placeholder="modalPlaceholderTitle" autocomplete="off" />
-        </label>
-
-        <label class="field">
-          <span class="label" data-lang="modalLabelDate">Ngày & giờ</span>
-          <input id="date" type="datetime-local" class="input" />
-        </label>
-
-        <label class="field">
-          <span class="label" data-lang="modalLabelTZ">Múi giờ</span>
-          <select id="tzSelect" class="select"></select>
-        </label>
+        <div class="input-group">
+          <label data-lang="modalLabelTitle">Tên sự kiện</label>
+          <input id="title" class="glass-input" data-lang-placeholder="modalPlaceholderTitle" autocomplete="off">
+        </div>
+        <div class="input-group">
+          <label data-lang="modalLabelDate">Thời gian</label>
+          <input id="date" type="datetime-local" class="glass-input">
+        </div>
+        <div class="input-group">
+          <label data-lang="modalLabelTZ">Múi giờ</label>
+          <select id="tzSelect" class="glass-select"></select>
+        </div>
       </div>
-
-      <div class="modal-actions">
-        <button id="apply" class="btn primary" data-lang="modalBtnApply">Bắt đầu đếm</button>
-        <button id="ics" class="btn" data-lang="modalBtnIcs">Tải .ics</button>
-        <button id="share" class="btn" data-lang="modalBtnShare">Sao chép link</button>
+      <div class="modal-footer">
+        <button id="apply" class="btn-3d primary full" data-lang="modalBtnApply">Bắt đầu</button>
+        <div class="sub-actions">
+          <button id="ics" class="text-link" data-lang="modalBtnIcs">Tải .ics</button>
+          <button id="share" class="text-link" data-lang="modalBtnShare">Copy Link</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <audio id="alarmSound" src="alarm.mp3" preload="auto"></audio>
-
-  <script src="app.js" defer></script>
+  <audio id="alarmSound" src="alarm.mp3"></audio>
+  <script src="app.js"></script>
 </body>
 </html>
