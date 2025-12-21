@@ -335,7 +335,6 @@ function apply() {
 
   if (t.getFullYear() < nowY) {
     const msg = currentLang === 'vi' ? `⚠️ Không thể chọn năm trước ${nowY}.` : `⚠️ Cannot select year before ${nowY}.`;
-    el.status.textContent = msg;
     alert(msg);
     return;
   }
