@@ -238,6 +238,9 @@ const el = {
 function initAudioUnlock() {
   function unlockAudio() {
     el.alarmSound.load();
+    if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+      Notification.requestPermission();
+    }
   }
   document.addEventListener('click', unlockAudio, { once: true });
   document.addEventListener('touchstart', unlockAudio, { once: true });
@@ -315,7 +318,7 @@ function initFromURL() {
 function updateLabels() { if (el.urlStatus) { el.urlStatus.textContent = (qs.has('title') || qs.has('date')) ? getString('urlStatusConfigured') : getString('urlStatusNotConfigured'); } }
 
 // ===== Modal Open/Close  =====
-function openModal(prefill) { const selectedYear = parseInt(el.year.value || new Date().getFullYear(), 10); el.tzSelect.value = tzName; if (prefill) { if (prefill.date) { const d = new Date(prefill.date); d.setFullYear(selectedYear); el.modalDate.value = dateToInputString(d, tzName); el.modalTitle.value = syncTitleYearToDate(prefill.name || '', d); } else if (prefill.name) { el.modalTitle.value = prefill.name; const t = new Date(selectedYear, new Date().getMonth(), new Date().getDate(), 9, 0, 0); el.modalDate.value = dateToInputString(t, tzName); } } else { const t = new Date(selectedYear, new Date().getMonth(), new Date().getDate(), new Date().getHours() + 1, 0, 0); el.modalDate.value = dateToInputString(t, tzName); } el.modal.setAttribute('aria-hidden', 'false'); el.modalTitle.focus(); }
+function openModal(prefill) { const selectedYear = parseInt(el.year.value || new Date().getFullYear(), 10); el.tzSelect.value = tzName; if (prefill) { if (prefill.date) { const d = new Date(prefill.date); d.setFullYear(selectedYear); el.modalDate.value = dateToInputString(d, tzName); el.modalTitle.value = syncTitleYearToDate(prefill.name || '', d); } else if (prefill.name) { el.modalTitle.value = prefill.name; const t = new Date(selectedYear, new Date().getMonth(), new Date().getDate(), 9, 0, 0); el.modalDate.value = dateToInputString(t, tzName); } } else { el.modalTitle.value = ''; const t = new Date(selectedYear, new Date().getMonth(), new Date().getDate(), new Date().getHours() + 1, 0, 0); el.modalDate.value = dateToInputString(t, tzName); } el.modal.setAttribute('aria-hidden', 'false'); el.modalTitle.focus(); }
 function closeModal() { el.modal.setAttribute('aria-hidden', 'true'); }
 
 // ===== ICS & Share  =====
@@ -328,7 +331,15 @@ function makeICS() { const t = parseInputToDate(); const raw = (el.modalTitle.va
 // ===== Apply  =====
 function apply() {
   let t = parseInputToDate(); if (!t) { el.status.textContent = getString('statusDateError'); return; }
-  const bumped = bumpToFuture(new Date(t)); if (bumped) { t = bumped.date; el.modalDate.value = dateToInputString(t, el.tzSelect.value); }
+  const nowY = new Date().getFullYear();
+
+  if (t.getFullYear() < nowY) {
+    const msg = currentLang === 'vi' ? `⚠️ Không thể chọn năm trước ${nowY}.` : `⚠️ Cannot select year before ${nowY}.`;
+    el.status.textContent = msg;
+    alert(msg);
+    return;
+  }
+
   const rawTitle = (el.modalTitle.value?.trim() || getString('defaultEventTitle'));
   el.modalTitle.value = syncTitleYearToDate(rawTitle, t);
   const exists = CUSTOM_EVENTS.some(ev => ev.date.toISOString() === t.toISOString() && ev.title === el.modalTitle.value);
@@ -425,7 +436,13 @@ function updateEventCards() {
     } else {
       bar.style.width = '100%';
       card.classList.add('past'); // Thêm class để làm mờ
-      if (!it.isFinished) { playAlarm(3); it.isFinished = true; }
+      if (!it.isFinished) {
+        playAlarm(3);
+        if ('Notification' in window && Notification.permission === 'granted') {
+          try { new Notification(getString('helperComplete'), { body: it.title }); } catch (e) { }
+        }
+        it.isFinished = true;
+      }
     }
   });
 }
