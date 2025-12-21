@@ -514,7 +514,7 @@ function createLibraryItem(it, now, displayedYear, isSuggestion) {
 
     // Tính số ngày còn lại
     const diffTime = it.date - now;
-    const daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const daysLeft = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
     // Format date nicely
     const dateStr = new Intl.DateTimeFormat(currentLang, { day: 'numeric', month: 'short' }).format(it.date);
