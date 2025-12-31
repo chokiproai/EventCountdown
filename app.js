@@ -447,6 +447,15 @@ function updateEventCards() {
         if ('Notification' in window && Notification.permission === 'granted') {
           try { new Notification(getString('helperComplete'), { body: it.title }); } catch (e) { }
         }
+
+        // Trigger Effects
+        const titleLower = it.title.toLowerCase();
+        if (titleLower.includes('new year') || titleLower.includes('tết') || titleLower.includes('giao thừa')) {
+          if (typeof startFireworks === 'function') startFireworks();
+        } else {
+          if (typeof startConfetti === 'function') startConfetti();
+        }
+
         it.isFinished = true;
       }
     }
