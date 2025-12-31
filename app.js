@@ -339,6 +339,13 @@ function apply() {
     return;
   }
 
+  // Prevent past dates
+  if (t <= new Date()) {
+    const msg = currentLang === 'vi' ? `⚠️ Sự kiện phải ở tương lai!` : `⚠️ Event must be in the future!`;
+    alert(msg);
+    return;
+  }
+
   const rawTitle = (el.modalTitle.value?.trim() || getString('defaultEventTitle'));
   el.modalTitle.value = syncTitleYearToDate(rawTitle, t);
   const exists = CUSTOM_EVENTS.some(ev => ev.date.toISOString() === t.toISOString() && ev.title === el.modalTitle.value);
@@ -530,7 +537,14 @@ function createLibraryItem(it, now, displayedYear, isSuggestion) {
 
     // Tính số ngày còn lại
     const diffTime = it.date - now;
-    const daysLeft = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    let val = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    let label = getString('lblDay') || 'Days';
+
+    // Nếu còn dưới 1 ngày (0 ngày), chuyển sang hiển thị giờ
+    if (val === 0) {
+      val = Math.floor(diffTime / (1000 * 60 * 60));
+      label = getString('lblHour') || 'Hours';
+    }
 
     // Format date nicely
     const dateStr = new Intl.DateTimeFormat(currentLang, { day: 'numeric', month: 'short' }).format(it.date);
@@ -542,9 +556,9 @@ function createLibraryItem(it, now, displayedYear, isSuggestion) {
           <div class="sug-title">${it.name}</div>
           <div class="sug-date">${dateStr} • ${it.date.getFullYear()}</div>
         </div>
-        <div class="sug-badge ${daysLeft <= 7 ? 'urgent' : ''}">
-          <span class="sug-days">${daysLeft}</span>
-          <span class="sug-label">${getString('lblDay') || 'Days'}</span>
+        <div class="sug-badge ${val <= 7 && label !== getString('lblHour') ? 'urgent' : ''}">
+          <span class="sug-days">${val}</span>
+          <span class="sug-label">${label}</span>
         </div>
       </div>
     `;
