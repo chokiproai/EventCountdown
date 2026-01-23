@@ -11,7 +11,7 @@ const CUSTOM_EVENTS = [];
 const STORAGE_KEY_EVENTS = 'countdown_events';
 
 let VN_EVENTS = [];
-let LUNAR_TEMPLATED = [];
+let LUNAR_DATES = {};
 let EDU_EVENTS = [];
 let STRINGS = {};
 // State for year rotation
@@ -100,18 +100,19 @@ const DEFAULT_LOCALES = {
         { "langKey": "independenceDay", "month": 9, "day": 2, "emoji": "🇻🇳" },
         { "langKey": "teachersDay", "month": 11, "day": 20, "emoji": "🍎" },
         { "langKey": "womensDay", "month": 3, "day": 8, "emoji": "🌸" },
-
         { "langKey": "childrensDay", "month": 6, "day": 1, "emoji": "🧸" },
         { "langKey": "christmas", "month": 12, "day": 25, "emoji": "🎄" },
         { "langKey": "halloween", "month": 10, "day": 31, "emoji": "🎃" },
-        { "langKey": "valentine", "month": 2, "day": 14, "emoji": "💘" },
-        { "langKey": "midAutumn", "templated": true, "fixedMonth": 10, "fixedDay": 6, "emoji": "🌕", "noteKey": "midAutumnNote" }
+        { "langKey": "valentine", "month": 2, "day": 14, "emoji": "💘" }
       ],
-      "LUNAR_TEMPLATED": [
-        { "langKey": "lunarNewYear", "templated": true, "baseISO": "2025-01-29T00:00", "emoji": "🧧", "noteKey": "genericNote" },
-        { "langKey": "lunarNewYearEve", "templated": true, "baseISO": "2025-01-28T23:59", "emoji": "🎆", "noteKey": "genericNote" },
-        { "langKey": "hungKings", "templated": true, "baseISO": "2025-04-08T00:00", "emoji": "🏛️", "noteKey": "genericNote" }
-      ],
+      "LUNAR_DATES": {
+        "2025": { "lunarNewYear": "2025-01-29T00:00", "lunarNewYearEve": "2025-01-28T23:59", "hungKings": "2025-04-07T00:00", "midAutumn": "2025-10-06T00:00" },
+        "2026": { "lunarNewYear": "2026-02-17T00:00", "lunarNewYearEve": "2026-02-16T23:59", "hungKings": "2026-04-25T00:00", "midAutumn": "2026-09-25T00:00" },
+        "2027": { "lunarNewYear": "2027-02-06T00:00", "lunarNewYearEve": "2027-02-05T23:59", "hungKings": "2027-04-16T00:00", "midAutumn": "2027-09-15T00:00" },
+        "2028": { "lunarNewYear": "2028-01-26T00:00", "lunarNewYearEve": "2028-01-25T23:59", "hungKings": "2028-04-04T00:00", "midAutumn": "2028-10-03T00:00" },
+        "2029": { "lunarNewYear": "2029-02-13T00:00", "lunarNewYearEve": "2029-02-12T23:59", "hungKings": "2029-04-22T00:00", "midAutumn": "2029-09-22T00:00" },
+        "2030": { "lunarNewYear": "2030-02-03T00:00", "lunarNewYearEve": "2030-02-02T23:59", "hungKings": "2030-04-12T00:00", "midAutumn": "2030-09-12T00:00" }
+      },
       "EDU_EVENTS": [
         { "langKey": "nationalExam", "templated": true, "baseISO": "2025-06-27T07:30", "emoji": "🎓", "noteKey": "nationalExamNote" },
         { "langKey": "schoolOpening", "templated": true, "baseISO": "2025-09-05T07:00", "emoji": "📚", "noteKey": "schoolOpeningNote" }
@@ -198,7 +199,6 @@ const DEFAULT_LOCALES = {
         { "langKey": "halloween", "month": 10, "day": 31, "emoji": "🎃" },
         { "langKey": "valentine", "month": 2, "day": 14, "emoji": "💘" }
       ],
-      "LUNAR_TEMPLATED": [],
       "EDU_EVENTS": []
     }
   }
@@ -302,7 +302,35 @@ function syncTitleYearToDate(title, date) { if (!title || !(date instanceof Date
 function buildLibraryForYear(y) {
   const items = [];
   VN_EVENTS.forEach(e => { const date = (e.fixedMonth && e.fixedDay) ? new Date(y, e.fixedMonth - 1, e.fixedDay, 0, 0, 0) : new Date(y, e.month - 1, e.day, 0, 0, 0); const name = e.templated ? renderTemplateWithYear(e.langKey, date) : getString(e.langKey); const note = e.noteKey ? getString(e.noteKey) : ''; items.push({ name, date, note, emoji: e.emoji || '📅' }); });
-  LUNAR_TEMPLATED.forEach(e => { const base = new Date(e.baseISO); const date = new Date(y, base.getMonth(), base.getDate(), base.getHours(), base.getMinutes(), base.getSeconds()); const name = renderTemplateWithYear(e.langKey, date); items.push({ name, date, note: getString(e.noteKey || 'genericNote'), emoji: e.emoji || '📅' }); });
+
+  // Lunar Events Calculation (Automatic)
+  if (typeof Lunisolar !== 'undefined') {
+    try {
+      // Tet Nguyen Dan (1/1 Lunar)
+      const tet = Lunisolar.getSolarDateFromLunar(1, 1, y);
+      if (tet) {
+        items.push({ name: renderTemplateWithYear('lunarNewYear', tet), date: tet, note: getString('genericNote'), emoji: '🧧' });
+        // Tet Eve (Tet - 1 day)
+        const eve = new Date(tet);
+        eve.setDate(eve.getDate() - 1);
+        items.push({ name: renderTemplateWithYear('lunarNewYearEve', eve), date: eve, note: getString('genericNote'), emoji: '🎆' });
+      }
+
+      // Hung Kings (10/3 Lunar)
+      const hungKings = Lunisolar.getSolarDateFromLunar(10, 3, y);
+      if (hungKings) {
+        items.push({ name: renderTemplateWithYear('hungKings', hungKings), date: hungKings, note: getString('hungKingsNote') || getString('genericNote'), emoji: '🏛️' });
+      }
+
+      // Mid Autumn (15/8 Lunar)
+      const midAutumn = Lunisolar.getSolarDateFromLunar(15, 8, y);
+      if (midAutumn) {
+        items.push({ name: renderTemplateWithYear('midAutumn', midAutumn), date: midAutumn, note: getString('midAutumnNote'), emoji: '🌕' });
+      }
+
+    } catch (e) { console.error("Lunar calc error:", e); }
+  }
+
   EDU_EVENTS.forEach(e => { const base = new Date(e.baseISO); const date = new Date(y, base.getMonth(), base.getDate(), base.getHours(), base.getMinutes(), base.getSeconds()); const name = renderTemplateWithYear(e.langKey, date); items.push({ name, date, note: e.noteKey ? getString(e.noteKey) : '', emoji: e.emoji || '📅' }); });
   return items.sort((a, b) => a.date - b.date);
 }
@@ -597,7 +625,7 @@ function createLibraryItem(it, now, displayedYear, isSuggestion) {
 // ===== Load Data =====
 async function loadEventLibrary(libraryData) {
   VN_EVENTS = libraryData.VN_EVENTS || [];
-  LUNAR_TEMPLATED = libraryData.LUNAR_TEMPLATED || [];
+  LUNAR_DATES = libraryData.LUNAR_DATES || {};
   EDU_EVENTS = libraryData.EDU_EVENTS || [];
   if (VN_EVENTS.length > 0) el.librarySection.removeAttribute('hidden');
 }
